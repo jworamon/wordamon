@@ -1,25 +1,134 @@
-import logo from './logo.svg';
 import './App.css';
+import React from 'react';
+import Row from './Row';
+import { wordsArray, wordsObject } from './words';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      winningWord: '',
+      letterCounts: {
+        S: 1,
+        C: 1,
+        A: 1,
+        L: 1,
+        E: 1
+      },
+      guessingWords: [],
+      currentRowIndex: 0,
+      currentWorkingWord: '',
+      colors: [],
+      isWinning: false,
+    }
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.updateGuessingWords = this.updateGuessingWords.bind(this);
+    this.checkLetterAndPosition = this.checkLetterAndPosition.bind(this);
+  }
+
+  componentDidMount() {
+    const guessingWords = Array(6).fill('');
+    this.setState({ guessingWords: guessingWords });
+    
+    document.addEventListener("keydown", this.handleKeyDown);
+    document.addEventListener("keypress", this.handleKeyPress);
+
+    const winningWord = wordsArray[Math.floor(Math.random() * 2315)].toUpperCase();
+    let letterCounts = {};
+
+    winningWord.split('').forEach(letter => {
+      if (!letterCounts[letter]) {
+        letterCounts[letter] = 1;
+      } else {
+        letterCounts[letter]++;
+      }
+    });
+    
+    this.setState({ winningWord: winningWord, letterCounts: letterCounts });
+  }
+
+  handleKeyDown(evt) {
+    if (!this.state.isWinning) {
+      if (evt.key === 'Backspace') {
+        this.setState({ currentWorkingWord: this.state.currentWorkingWord.slice(0, -1) });
+        this.updateGuessingWords(this.state.currentRowIndex);
+      }
+  
+      if (evt.key === 'Enter') {
+        this.checkLetterAndPosition(this.state.currentWorkingWord);
+        this.setState({ currentRowIndex: this.state.currentRowIndex + 1, currentWorkingWord: '' });
+      }
+    }
+  }
+
+  handleKeyPress(evt) {
+    if (!this.state.isWinning) {
+      if (evt.key !== 'Enter') {
+        this.setState({ currentWorkingWord: this.state.currentWorkingWord + evt.key.toUpperCase() })
+        this.updateGuessingWords(this.state.currentRowIndex);
+      }
+    }
+  }
+
+  updateGuessingWords(currentIndex) {
+    const updatedGuessingWords = this.state.guessingWords;
+    updatedGuessingWords.splice(currentIndex, 1, this.state.currentWorkingWord);
+    this.setState({ guessingWords: updatedGuessingWords });
+  }
+
+  checkLetterAndPosition(guessingWord) {
+    const winningWord = this.state.winningWord;
+    const letterCount = { ...this.state.letterCounts };
+    const colorArr = [];
+
+    //check if letter is at the right index first
+    guessingWord.split('').forEach((letter, idx) => {
+      if (letter === winningWord[idx]) {
+        colorArr.push('green');
+        letterCount[letter]--;
+      } else {
+        colorArr.push('');
+      }
+    });
+
+    //check if winning word includes letter but not at correct index
+    guessingWord.split('').forEach((letter, idx) => {
+      if (letter !== winningWord[idx] && winningWord.includes(letter) && letterCount[letter]) {
+        colorArr[idx] = 'yellow';
+        letterCount[letter]--;
+      }
+    });
+
+    this.setState({ colors: [...this.state.colors, colorArr] });
+
+    if (guessingWord === winningWord) this.setState({ isWinning: true });
+
+  }
+
+  render() {
+    const { guessingWords, colors, currentRowIndex, winningWord, isWinning } = this.state;
+
+    return (
+      <div className="main">
+        <div className="gameName"><b>WORDLE</b></div>
+        <div className="gameResult">
+          { isWinning ? 'CONGRATULATIONS!!' : ''}
+          { currentRowIndex >= 6 ? `WINNING WORD: ${winningWord}` : ''}
+        </div>
+        <div className="gameBoard" onKeyPress={this.handleKeyPress} onKeyDown={this.handleKeyDown} >
+          <Row word={guessingWords[0]} colors={colors[0]} />
+          <Row word={guessingWords[1]} colors={colors[1]} />
+          <Row word={guessingWords[2]} colors={colors[2]} />
+          <Row word={guessingWords[3]} colors={colors[3]} />
+          <Row word={guessingWords[4]} colors={colors[4]} />
+          <Row word={guessingWords[5]} colors={colors[5]} />
+        </div>
+      </div>
+
+    );
+
+  }
 }
 
 export default App;
