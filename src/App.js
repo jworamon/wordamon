@@ -19,7 +19,7 @@ const App = () => {
     _setCurrentWord(word);
   };
 
-  // act as componentDidMount
+  // set winningWord and letterCounts
   useEffect(() => {
     if (winningWord === '') {
       const newWinningWord = wordsArray[Math.floor(Math.random() * 2315)].toUpperCase()
@@ -35,16 +35,64 @@ const App = () => {
       setWinningWord(newWinningWord);
       setLetterCounts(newLetterCounts);
 
-      document.addEventListener("keypress", handleKeyPress);
-      document.addEventListener("keydown", handleKeyDown);
+    }
+  }, [winningWord]);
+
+
+  // add keydown and keypress event listeners
+  useEffect(() => {
+    document.addEventListener("keypress", handleKeyPress);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keypress", handleKeyPress);
+      document.removeEventListener("keydown", handleKeyDown);
     }
   });
+  
+  // handle letter keys
+  const handleKeyPress = (evt) => {
+    if (currentRowIndex < 6 || !isWinning) {
+      if (evt.key !== 'Enter') {
+        // console.log('PRE :', currentWordRef.current);
+        setCurrentWord(currentWordRef.current + evt.key.toUpperCase());
+        // console.log('POST :', currentWordRef.current)
+      }
+    }
+  }
+
+  // handle backspace and enter keys
+  const handleKeyDown = (evt) => {
+    if (currentRowIndex < 6 || !isWinning) {
+      if (evt.key === 'Backspace') {
+        setCurrentWord(currentWordRef.current.slice(0, -1));
+      }
+      if (evt.key === 'Enter') {
+        evt.preventDefault(); //prevent the browser from registering hitting enter key as clicking button
+
+        // check if the word is valid
+        const word = currentWordRef.current;
+        if (!wordsObject[word]) {
+          setNoneWordErr('INVALID WORD');
+          setCurrentWord('');
+        } else {
+          // setCurrentRowIndex(currentRowIndexRef.current + 1);
+          setCurrentRowIndex(idx => idx + 1); 
+          // ^^^ using the function as an argument allows us to access most recent state each time
+          // without having to use useRef
+          setNoneWordErr('');
+        }
+      }
+    }
+  }
+
 
   // listen for when currentWord changes (user types letter) 
   // then call updateGuessingWords
   useEffect(() => {
     updateGuessingWords(currentRowIndex);
   }, [currentWord]);
+
 
   // listen for when currentRowIndex changes (user hits enter)
   // then call checkLetterAndPosition and reset currentWord to an empty string
@@ -56,43 +104,13 @@ const App = () => {
   }, [currentRowIndex]);
 
 
-  // handle letter keys
-  const handleKeyPress = (evt) => {
-    if (!isWinning) {
-      if (evt.key !== 'Enter') {
-        setCurrentWord(currentWordRef.current + evt.key.toUpperCase());
-        
-      }
-    }
-  }
-
-  // handle backspace and enter keys
-  const handleKeyDown = (evt) => {
-    if (!isWinning) {
-      if (evt.key === 'Backspace') {
-        setCurrentWord(currentWordRef.current.slice(0, -1));
-      }
-      if (evt.key === 'Enter') {
-        // check if the word is valid 
-        const word = currentWordRef.current;
-        if (!wordsObject[word]) {
-          setNoneWordErr('INVALID WORD');
-          setCurrentWord('');
-        } else {
-          setCurrentRowIndex(idx => idx + 1); 
-          // ^^^ using the function as an argument allows us to access most recent state each time
-          // without having to use useRef
-          setNoneWordErr('');
-        }
-      }
-    }
-  }
-
   // after updating currentWord, update the word within guessingWords array
   const updateGuessingWords = (currentIndex) => {
-    const updatedGuessingWords = [...guessingWords];
-    updatedGuessingWords.splice(currentIndex, 1, currentWord);
-    setGuessingWords(updatedGuessingWords);
+    if (currentIndex < 6) {
+      const updatedGuessingWords = [...guessingWords];
+      updatedGuessingWords.splice(currentIndex, 1, currentWord);
+      setGuessingWords(updatedGuessingWords);
+    }
   }
 
   // after submitting a guess, check letters against winningWord and add colors
@@ -124,13 +142,27 @@ const App = () => {
 
   }
 
+  
+  const startNewGame = (evt) => {
+    setWinningWord('');
+    setLetterCounts({});
+    setGuessingWords(Array(6).fill(''));
+    setCurrentWord('');
+    setCurrentRowIndex(0);
+    setColors([]);
+    setIsWinning(false);
+    setNoneWordErr('');
+  }
+
+
   return (
     <div className="main">
       <div className="gameResult">
         {noneWordErr}
         {isWinning ? 'CONGRATULATIONS!!' : ''}
-        {currentRowIndex >= 6 ? `WINNING WORD: ${winningWord}` : ''}
+        {!isWinning && currentRowIndex >= 6 ? `WINNING WORD: ${winningWord}` : ''}
       </div>
+
       <div className="gameBoard" onKeyPress={handleKeyPress} onKeyDown={handleKeyDown} >
         <Row word={guessingWords[0]} colors={colors[0]} />
         <Row word={guessingWords[1]} colors={colors[1]} />
@@ -139,6 +171,8 @@ const App = () => {
         <Row word={guessingWords[4]} colors={colors[4]} />
         <Row word={guessingWords[5]} colors={colors[5]} />
       </div>
+
+      <button onClick={startNewGame}>NEW GAME</button>
     </div>
   );
 }
