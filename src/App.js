@@ -138,11 +138,15 @@ const App = () => {
     const workingLetterCounts = { ...letterCounts };
     const colorArr = [];
 
-    //first, check if letter is at the right index
+    // check if letter is at the right index
     word.split('').forEach((letter, idx) => {
       if (letter === winningWord[idx]) {
         colorArr.push('green');
         setButtonTheme((prev) => {
+          // console.log(prev);
+          if (prev.yellow.includes(letter)) {
+            return {...prev, yellow: prev.yellow.replaceAll(`${letter} `, ''), green: prev.green + letter + ' '}
+          }     
           return { ...prev, green: prev.green + letter + ' ' }
         });
         workingLetterCounts[letter]--;
@@ -151,7 +155,7 @@ const App = () => {
       }
     });
 
-    //then check if winning word includes letter but not at correct index
+    // check if winning word includes letter but not at correct index
     word.split('').forEach((letter, idx) => {
       if (letter !== winningWord[idx] && winningWord.includes(letter) && workingLetterCounts[letter]) {
         colorArr[idx] = 'yellow';
@@ -170,8 +174,6 @@ const App = () => {
 
     if (word === winningWord) setIsWinning(true);
 
-    console.log(buttonTheme);
-
   }
 
 
@@ -184,6 +186,11 @@ const App = () => {
     setColors([]);
     setIsWinning(false);
     setNoneWordErr('');
+    setButtonTheme({
+      green: 'a ',
+      yellow: 'a ',
+      gray: 'a '
+    })
   }
 
   return (
@@ -215,14 +222,14 @@ const App = () => {
             }}
             buttonTheme={[
               {
-                class: "button-green",
-                buttons: buttonTheme.green
+                class: "button-gray",
+                buttons: buttonTheme.gray
               }, {
                 class: "button-yellow",
                 buttons: buttonTheme.yellow
               }, {
-                class: "button-gray",
-                buttons: buttonTheme.gray
+                class: "button-green",
+                buttons: buttonTheme.green
               }
             ]}
           />
