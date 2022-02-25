@@ -143,7 +143,6 @@ const App = () => {
       if (letter === winningWord[idx]) {
         colorArr.push('green');
         setButtonTheme((prev) => {
-          // console.log(prev);
           if (prev.yellow.includes(letter)) {
             return {...prev, yellow: prev.yellow.replaceAll(`${letter} `, ''), green: prev.green + letter + ' '}
           }     
