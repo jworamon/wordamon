@@ -22,3 +22,7 @@ nav {
   text-align: center;
   color: white;
 }
+
+.simple-keyboard.hg-layout-default .hg-button.button-green {
+  background: green;
+}

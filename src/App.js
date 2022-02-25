@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Row from './Row';
+// import Keyboard from './Keyboard';
+import Keyboard from 'react-simple-keyboard';
+import 'react-simple-keyboard/build/css/index.css';
 import { wordsArray, wordsObject } from './words';
 
 const App = () => {
@@ -68,23 +71,37 @@ const App = () => {
       }
       if (evt.key === 'Enter') {
         evt.preventDefault(); //prevent the browser from registering hitting enter key as clicking button
-
-        // check if the word is valid
-        const word = currentWordRef.current;
-        if (!wordsObject[word]) {
-          setNoneWordErr('INVALID WORD');
-          setCurrentWord('');
-        } else {
-          // setCurrentRowIndex(currentRowIndexRef.current + 1);
-          setCurrentRowIndex(idx => idx + 1);
-          // ^^^ using the function as an argument allows us to access most recent state each time
-          // without having to use useRef
-          setNoneWordErr('');
-        }
+        handleGuess();
       }
     }
   }
 
+  const handleKeyBoardInput = (input) => {
+    if (currentRowIndex < 6 || !isWinning) {
+      if (input === '{enter}') {
+        handleGuess();
+      } else if (input === '{bksp}') {
+        setCurrentWord(currentWordRef.current.slice(0, -1));
+      } else if (currentWord.length < 5) {
+          setCurrentWord(currentWordRef.current + input);
+      }
+    }
+  }
+
+  const handleGuess = () => {
+     // check if the word is valid
+     const word = currentWordRef.current;
+     if (!wordsObject[word]) {
+       setNoneWordErr('INVALID WORD');
+       setCurrentWord('');
+     } else {
+       // setCurrentRowIndex(currentRowIndexRef.current + 1);
+       setCurrentRowIndex(idx => idx + 1);
+       // ^^^ using the function as an argument allows us to access most recent state each time
+       // without having to use useRef
+       setNoneWordErr('');
+     }
+  }
 
   // listen for when currentWord changes (user types letter) 
   // then call updateGuessingWords
@@ -173,6 +190,22 @@ const App = () => {
         </div>
 
         <button onClick={startNewGame}>NEW GAME</button>
+
+        <Keyboard onKeyPress={handleKeyBoardInput}
+          layout={{
+            default: [
+              "Q W E R T Y U I O P",
+              "A S D F G H J K L",
+              "{bksp} Z X C V B N M {enter}",
+            ],
+          }}
+        // buttonTheme={[
+        //   {
+        //     class: "button-green",
+        //     buttons: "Q W"
+        //   }
+        // ]}
+        />
 
       </div>
     </div>
