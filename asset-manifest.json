@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/wordamon/static/css/main.cfcd4c38.css",
-    "main.js": "/wordamon/static/js/main.4b4b9e6d.js",
+    "main.js": "/wordamon/static/js/main.fe15df45.js",
     "static/js/787.a4e2a996.chunk.js": "/wordamon/static/js/787.a4e2a996.chunk.js",
     "index.html": "/wordamon/index.html",
     "main.cfcd4c38.css.map": "/wordamon/static/css/main.cfcd4c38.css.map",
-    "main.4b4b9e6d.js.map": "/wordamon/static/js/main.4b4b9e6d.js.map",
+    "main.fe15df45.js.map": "/wordamon/static/js/main.fe15df45.js.map",
     "787.a4e2a996.chunk.js.map": "/wordamon/static/js/787.a4e2a996.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cfcd4c38.css",
-    "static/js/main.4b4b9e6d.js"
+    "static/js/main.fe15df45.js"
   ]
 }
