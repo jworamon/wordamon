@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Row from './Row';
@@ -49,14 +50,12 @@ const App = () => {
       document.removeEventListener("keydown", handleKeyDown);
     }
   });
-  
+
   // handle letter keys
   const handleKeyPress = (evt) => {
     if (currentRowIndex < 6 || !isWinning) {
-      if (evt.key !== 'Enter') {
-        // console.log('PRE :', currentWordRef.current);
+      if (evt.key !== 'Enter' && currentWord.length < 5) {
         setCurrentWord(currentWordRef.current + evt.key.toUpperCase());
-        // console.log('POST :', currentWordRef.current)
       }
     }
   }
@@ -77,7 +76,7 @@ const App = () => {
           setCurrentWord('');
         } else {
           // setCurrentRowIndex(currentRowIndexRef.current + 1);
-          setCurrentRowIndex(idx => idx + 1); 
+          setCurrentRowIndex(idx => idx + 1);
           // ^^^ using the function as an argument allows us to access most recent state each time
           // without having to use useRef
           setNoneWordErr('');
@@ -142,7 +141,7 @@ const App = () => {
 
   }
 
-  
+
   const startNewGame = (evt) => {
     setWinningWord('');
     setLetterCounts({});
@@ -156,24 +155,28 @@ const App = () => {
 
 
   return (
-    <div className="main">
-      <div className="gameResult">
-        {noneWordErr}
-        {isWinning ? 'CONGRATULATIONS!!' : ''}
-        {!isWinning && currentRowIndex >= 6 ? `WINNING WORD: ${winningWord}` : ''}
-      </div>
+    <div>
+      <div className="main">
+        <div className="gameResult">
+          {noneWordErr}
+          {isWinning ? 'CONGRATULATIONS!!' : ''}
+          {!isWinning && currentRowIndex >= 6 ? `WINNING WORD: ${winningWord}` : ''}
+        </div>
 
-      <div className="gameBoard" onKeyPress={handleKeyPress} onKeyDown={handleKeyDown} >
-        <Row word={guessingWords[0]} colors={colors[0]} />
-        <Row word={guessingWords[1]} colors={colors[1]} />
-        <Row word={guessingWords[2]} colors={colors[2]} />
-        <Row word={guessingWords[3]} colors={colors[3]} />
-        <Row word={guessingWords[4]} colors={colors[4]} />
-        <Row word={guessingWords[5]} colors={colors[5]} />
-      </div>
+        <div className="gameBoard" onKeyPress={handleKeyPress} onKeyDown={handleKeyDown} >
+          <Row word={guessingWords[0]} colors={colors[0]} />
+          <Row word={guessingWords[1]} colors={colors[1]} />
+          <Row word={guessingWords[2]} colors={colors[2]} />
+          <Row word={guessingWords[3]} colors={colors[3]} />
+          <Row word={guessingWords[4]} colors={colors[4]} />
+          <Row word={guessingWords[5]} colors={colors[5]} />
+        </div>
 
-      <button onClick={startNewGame}>NEW GAME</button>
+        <button onClick={startNewGame}>NEW GAME</button>
+
+      </div>
     </div>
+
   );
 }
 
