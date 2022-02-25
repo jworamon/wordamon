@@ -16,7 +16,11 @@ const App = () => {
   const [colors, setColors] = useState([]);
   const [isWinning, setIsWinning] = useState(false);
   const [noneWordErr, setNoneWordErr] = useState('');
-
+  const [buttonTheme, setButtonTheme] = useState({
+    green: 'a ',
+    yellow: 'a ',
+    gray: 'a '
+  });
   const currentWordRef = useRef(currentWord);
   const setCurrentWord = (word) => {
     currentWordRef.current = word;
@@ -83,24 +87,24 @@ const App = () => {
       } else if (input === '{bksp}') {
         setCurrentWord(currentWordRef.current.slice(0, -1));
       } else if (currentWord.length < 5) {
-          setCurrentWord(currentWordRef.current + input);
+        setCurrentWord(currentWordRef.current + input);
       }
     }
   }
 
   const handleGuess = () => {
-     // check if the word is valid
-     const word = currentWordRef.current;
-     if (!wordsObject[word]) {
-       setNoneWordErr('INVALID WORD');
-       setCurrentWord('');
-     } else {
-       // setCurrentRowIndex(currentRowIndexRef.current + 1);
-       setCurrentRowIndex(idx => idx + 1);
-       // ^^^ using the function as an argument allows us to access most recent state each time
-       // without having to use useRef
-       setNoneWordErr('');
-     }
+    // check if the word is valid
+    const word = currentWordRef.current;
+    if (!wordsObject[word]) {
+      setNoneWordErr('INVALID WORD');
+      setCurrentWord('');
+    } else {
+      // setCurrentRowIndex(currentRowIndexRef.current + 1);
+      setCurrentRowIndex(idx => idx + 1);
+      // ^^^ using the function as an argument allows us to access most recent state each time
+      // without having to use useRef
+      setNoneWordErr('');
+    }
   }
 
   // listen for when currentWord changes (user types letter) 
@@ -138,6 +142,9 @@ const App = () => {
     word.split('').forEach((letter, idx) => {
       if (letter === winningWord[idx]) {
         colorArr.push('green');
+        setButtonTheme((prev) => {
+          return { ...prev, green: prev.green + letter + ' ' }
+        });
         workingLetterCounts[letter]--;
       } else {
         colorArr.push('');
@@ -148,13 +155,22 @@ const App = () => {
     word.split('').forEach((letter, idx) => {
       if (letter !== winningWord[idx] && winningWord.includes(letter) && workingLetterCounts[letter]) {
         colorArr[idx] = 'yellow';
+        setButtonTheme((prev) => {
+          return { ...prev, yellow: prev.yellow + letter + ' ' }
+        });
         workingLetterCounts[letter]--;
+      } else if (!winningWord.includes(letter)) {
+        setButtonTheme((prev) => {
+          return { ...prev, gray: prev.gray + letter + ' ' }
+        });
       }
     });
 
     setColors([...colors, colorArr]);
 
     if (word === winningWord) setIsWinning(true);
+
+    console.log(buttonTheme);
 
   }
 
@@ -169,7 +185,6 @@ const App = () => {
     setIsWinning(false);
     setNoneWordErr('');
   }
-
 
   return (
     <div>
@@ -189,23 +204,31 @@ const App = () => {
           <Row word={guessingWords[5]} colors={colors[5]} />
         </div>
 
-        <button onClick={startNewGame}>NEW GAME</button>
+        <div className="virtual-keyboard">
+          <Keyboard onKeyPress={handleKeyBoardInput}
+            layout={{
+              default: [
+                "Q W E R T Y U I O P",
+                "A S D F G H J K L",
+                "{bksp} Z X C V B N M {enter}",
+              ],
+            }}
+            buttonTheme={[
+              {
+                class: "button-green",
+                buttons: buttonTheme.green
+              }, {
+                class: "button-yellow",
+                buttons: buttonTheme.yellow
+              }, {
+                class: "button-gray",
+                buttons: buttonTheme.gray
+              }
+            ]}
+          />
+        </div>
 
-        <Keyboard onKeyPress={handleKeyBoardInput}
-          layout={{
-            default: [
-              "Q W E R T Y U I O P",
-              "A S D F G H J K L",
-              "{bksp} Z X C V B N M {enter}",
-            ],
-          }}
-        // buttonTheme={[
-        //   {
-        //     class: "button-green",
-        //     buttons: "Q W"
-        //   }
-        // ]}
-        />
+        <button onClick={startNewGame}>NEW GAME</button>
 
       </div>
     </div>
